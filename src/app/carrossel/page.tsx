@@ -17,7 +17,7 @@ export default async function CarrosselPage() {
 
       const { data: items, error: itemsError } = await supabase
         .from('items')
-        .select('id,title,description,price_cents,image_path,image_paths,whatsapp_message,position')
+        .select('id,title,description,price_cents,image_path,image_paths,whatsapp_message,published,position,created_at,updated_at')
         .eq('published', true)
         .order('position', { ascending: true });
 
