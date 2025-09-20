@@ -58,7 +58,7 @@ export default async function CarrosselPage() {
             ? item.image_paths 
             : (item.image_path ? [item.image_path] : []);
           
-          const imageUrls = imagePaths.map(path => urlFor(path));
+          const imageUrls = imagePaths.map((path: string) => urlFor(path));
           
           return (
                 <ItemCard
