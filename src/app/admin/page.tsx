@@ -51,7 +51,7 @@ export default function AdminPage() {
           ? item.image_paths 
           : (item.image_path ? [item.image_path] : []);
         
-        const imageUrls = imagePaths.map(path => 
+        const imageUrls = imagePaths.map((path: string) => 
           supabase.storage.from('items').getPublicUrl(path).data.publicUrl
         );
         
