@@ -22,7 +22,7 @@ export function ItemCard({ item }: ItemCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const imageDimensions = useImageDimensions(item.image_url);
   
-  const buildWhatsAppLink = (title: string) => {
+  const buildWhatsAppLink = () => {
     const clean = (item.whatsapp_number || '').replace(/\D/g, '');
     const text = encodeURIComponent(`Olá! Tenho interesse, ${item.whatsapp_message || ''}`);
     return `https://wa.me/${clean}?text=${text}`;
@@ -83,7 +83,7 @@ export function ItemCard({ item }: ItemCardProps) {
             onClick={(e) => e.stopPropagation()}
           >
             <a 
-              href={buildWhatsAppLink(item.title)} 
+              href={buildWhatsAppLink()} 
               target="_blank" 
               rel="noopener noreferrer" 
               aria-label="Conversar no WhatsApp"

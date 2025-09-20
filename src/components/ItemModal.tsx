@@ -43,7 +43,7 @@ export function ItemModal({ item, isOpen, onClose }: ItemModalProps) {
     }
   }, [currentImageIndex, isOpen, images.length]);
 
-  const buildWhatsAppLink = (title: string) => {
+  const buildWhatsAppLink = () => {
     const clean = (item.whatsapp_number || '').replace(/\D/g, '');
     const text = encodeURIComponent(`Olá! Tenho interesse, ${item.whatsapp_message || ''}`);
     return `https://wa.me/${clean}?text=${text}`;
@@ -273,7 +273,7 @@ export function ItemModal({ item, isOpen, onClose }: ItemModalProps) {
               className="w-full gap-3 text-base sm:text-lg py-4 sm:py-6 px-6 sm:px-8 bg-green-600 hover:bg-green-700 transition-all duration-200 hover:scale-105"
             >
               <a
-                href={buildWhatsAppLink(item.title)}
+                href={buildWhatsAppLink()}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-3"

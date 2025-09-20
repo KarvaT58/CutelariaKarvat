@@ -1,14 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabaseBrowser } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Edit, Trash2, Eye, EyeOff, ImageIcon } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { Item, Settings, ItemWithImageUrl } from '@/types/database';
 import { formatBRL } from '@/lib/formatters';
 import { toast } from 'sonner';
@@ -33,7 +32,7 @@ export default function AdminPage() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<Item | null>(null);
 
-  async function fetchAll() {
+  const fetchAll = useCallback(async () => {
     const { data: itemsData } = await supabase
       .from('items')
       .select('*')
@@ -66,11 +65,11 @@ export default function AdminPage() {
     }
     
     setSettings(settingsData);
-  }
+  }, [supabase]);
 
   useEffect(() => {
     fetchAll();
-  }, []);
+  }, [fetchAll]);
 
   // Cleanup object URLs when component unmounts or files change
   useEffect(() => {
