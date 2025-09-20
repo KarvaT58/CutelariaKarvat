@@ -142,7 +142,7 @@ export default function AdminPage() {
       toast.success(editingItem ? 'Item atualizado!' : 'Item criado!');
       setOpen(false);
       setEditingItem(null);
-      setForm({ title: '', description: '', price_cents: '', position: 0, published: true, files: [] });
+      setForm({ title: '', description: '', price_cents: '', whatsapp_message: '', position: 0, published: true, files: [] });
       fetchAll();
     }
     setLoading(false);
