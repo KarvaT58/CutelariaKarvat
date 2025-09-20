@@ -1,36 +1,147 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🗡️ Carrossel de Facas Artesanais
 
-## Getting Started
+Sistema de vitrine pública para facas artesanais com área administrativa completa.
 
-First, run the development server:
+## ✨ Funcionalidades
 
+- **Página Pública** (`/carrossel`): Cards responsivos com imagem, título, descrição, preço e botão WhatsApp
+- **Área Admin** (`/admin`): CRUD completo de itens + configurações do WhatsApp
+- **Upload de Imagens**: Integração com Supabase Storage
+- **Responsivo**: Mobile-first design
+- **Autenticação**: Proteção da área administrativa
+
+## 🛠️ Stack Tecnológica
+
+- **Frontend**: Next.js 14, React 18, TypeScript, TailwindCSS, shadcn/ui
+- **Backend**: Supabase (Postgres + Auth + Storage)
+- **Segurança**: RLS (Row Level Security)
+
+## 🚀 Setup Rápido
+
+### 1. Instalar Dependências
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Configurar Supabase
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+#### Criar Projeto no Supabase
+1. Acesse [supabase.com](https://supabase.com)
+2. Crie um novo projeto
+3. Anote a URL e a chave anônima
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+#### Executar SQL no Editor SQL
+```sql
+-- Tabelas
+CREATE TABLE public.settings (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  whatsapp_number text NOT NULL,
+  whatsapp_message text NOT NULL,
+  updated_at timestamptz DEFAULT now()
+);
 
-## Learn More
+CREATE TABLE public.items (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  title text NOT NULL,
+  description text NOT NULL,
+  price_cents int NOT NULL,
+  image_path text NOT NULL,
+  published boolean DEFAULT true,
+  position int DEFAULT 0,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
 
-To learn more about Next.js, take a look at the following resources:
+-- RLS
+ALTER TABLE public.items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.settings ENABLE ROW LEVEL SECURITY;
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+-- Políticas
+CREATE POLICY "read_items_public" ON public.items
+FOR SELECT USING (published = true);
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+CREATE POLICY "write_items_authenticated" ON public.items
+FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
-## Deploy on Vercel
+CREATE POLICY "read_settings_public" ON public.settings
+FOR SELECT USING (true);
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+CREATE POLICY "write_settings_authenticated" ON public.settings
+FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+-- Inserir configuração inicial
+INSERT INTO public.settings (whatsapp_number, whatsapp_message) 
+VALUES ('+5541999999999', 'Olá! Tenho interesse nesta faca.');
+```
+
+#### Configurar Storage
+1. Vá em **Storage** no painel do Supabase
+2. Crie um bucket chamado `items`
+3. Configure como público para leitura
+
+### 3. Variáveis de Ambiente
+```bash
+cp .env.example .env.local
+```
+
+Edite `.env.local` com suas credenciais:
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://seu-projeto.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sua-chave-anonima
+```
+
+### 4. Executar o Projeto
+```bash
+npm run dev
+```
+
+Acesse [http://localhost:3000](http://localhost:3000)
+
+## 📱 Rotas
+
+- **`/`** → Redireciona para `/carrossel`
+- **`/carrossel`** → Vitrine pública dos itens
+- **`/admin`** → Área administrativa (requer autenticação)
+
+## 🔐 Autenticação Admin
+
+Para acessar a área administrativa, você precisará configurar autenticação no Supabase:
+
+1. Vá em **Authentication** → **Settings**
+2. Configure os provedores desejados (Email, Google, etc.)
+3. Crie um usuário ou use magic link
+
+## 🎨 Personalização
+
+### Cores e Tema
+Edite `src/app/globals.css` para personalizar as cores do tema.
+
+### Layout
+- **Grid responsivo**: 1col (xs) → 2col (sm) → 3col (lg) → 4col (xl)
+- **Imagens**: Aspect ratio 16:9, otimizadas com Next Image
+- **Tipografia**: Mobile-first com line-clamp
+
+## 📦 Deploy
+
+### Vercel (Recomendado)
+1. Conecte o repositório ao Vercel
+2. Configure as variáveis de ambiente
+3. Deploy automático
+
+### Outras Plataformas
+O projeto é compatível com qualquer plataforma que suporte Next.js.
+
+## 🛡️ Segurança
+
+- **RLS**: Leitura pública apenas para itens publicados
+- **Escrita**: Apenas usuários autenticados
+- **Upload**: Validação de tipos de arquivo
+- **CORS**: Configurado no Supabase
+
+## 📄 Licença
+
+MIT License - veja o arquivo LICENSE para detalhes.
+
+---
+
+**Desenvolvido com ❤️ usando Next.js e Supabase**

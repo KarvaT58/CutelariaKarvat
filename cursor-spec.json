@@ -1,0 +1,55 @@
+{
+  "projectName": "carrossel-facas-artesanais",
+  "stack": {
+    "frontend": ["Next.js 14 App Router", "TypeScript", "React 18", "TailwindCSS", "shadcn/ui", "lucide-react"],
+    "backend": ["Supabase (Postgres, Auth, Storage)", "RLS", "Next Server Components"],
+    "deploy": ["Vercel"]
+  },
+  "env": [
+    "NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY=ey..."
+  ],
+  "setupScripts": [
+    "npx create-next-app@latest --typescript --tailwind --eslint --app",
+    "npm install @supabase/supabase-js @supabase/ssr @supabase/auth-helpers-nextjs zod lucide-react",
+    "npm install -D @types/node",
+    "npx shadcn@latest init -y",
+    "npx shadcn@latest add button card input textarea form dialog sheet toast label"
+  ],
+  "supabaseSchema": {
+    "tables": [
+      "CREATE TABLE public.settings (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), whatsapp_number text NOT NULL, whatsapp_message text NOT NULL, updated_at timestamptz DEFAULT now());",
+      "CREATE TABLE public.items (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), title text NOT NULL, description text NOT NULL, price_cents int NOT NULL, image_path text NOT NULL, published boolean DEFAULT true, position int DEFAULT 0, created_at timestamptz DEFAULT now(), updated_at timestamptz DEFAULT now());"
+    ],
+    "rls": [
+      "ALTER TABLE public.items ENABLE ROW LEVEL SECURITY;",
+      "ALTER TABLE public.settings ENABLE ROW LEVEL SECURITY;",
+      "CREATE POLICY \"read_items_public\" ON public.items FOR SELECT USING (published = true);",
+      "CREATE POLICY \"write_items_authenticated\" ON public.items FOR ALL TO authenticated USING (true) WITH CHECK (true);",
+      "CREATE POLICY \"read_settings_public\" ON public.settings FOR SELECT USING (true);",
+      "CREATE POLICY \"write_settings_authenticated\" ON public.settings FOR ALL TO authenticated USING (true) WITH CHECK (true);"
+    ],
+    "storage": {
+      "bucket": "items",
+      "policies": ["Leitura pública para bucket items"]
+    }
+  },
+  "files": {
+    "package.json": {
+      "dependencies": {
+        "@supabase/auth-helpers-nextjs": "^0.8.7",
+        "@supabase/supabase-js": "^2.39.3",
+        "@supabase/ssr": "^0.1.0",
+        "lucide-react": "^0.303.0",
+        "zod": "^3.22.4"
+      }
+    },
+    "tailwind.config.ts": "module.exports = {content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}'], theme: {extend: {}}, plugins: [require('@tailwindcss/line-clamp')]}",
+    "components.json": "{\"style\": \"default\", \"rsc\": true, \"tsx\": true, \"tailwind\": {\"config\": \"tailwind.config.ts\", \"css\": \"app/globals.css\", \"baseColor\": \"slate\", \"cssVariables\": true}}",
+    "lib/supabase.ts": "import { createBrowserClient, createServerClient } from '@supabase/ssr'; import { cookies } from 'next/headers'; export const supabaseBrowser = () => createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!); export const supabaseServer = () => { const cookieStore = cookies(); return createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, { cookies: { get: (name: string) => cookieStore.get(name)?.value } }); };",
+    "lib/utils.ts": "import { type ClassValue, clsx } from \"clsx\"; import { twMerge } from \"tailwind-merge\"; export function cn(...inputs: ClassValue[]) { return twMerge(clsx(inputs)); }",
+    "types/database.ts": "export type Item = { id: string; title: string; description: string; price_cents: number; image_path: string; published: boolean; position: number; created_at: string; updated_at: string; }; export type Settings = { id: string; whatsapp_number: string; whatsapp_message: string; updated_at: string; };",
+    "lib/whatsapp.ts": "export function buildWhatsAppLink(phone: string, message: string) { const clean = (phone || '').replace(/\\D/g, ''); return (title: string) => { const text = encodeURIComponent(`${message || 'Olá! Tenho interesse.'} - Produto: ${title}`); return `https://wa.me/${clean}?text=${text}`; }; }",
+    "lib/formatters.ts": "export function formatBRL(cents: number) { return (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }"
+  }
+}
